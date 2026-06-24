@@ -1,9 +1,15 @@
-const STEPS = ["Protocol", "Patients", "Results"];
+const DEFAULT_STEPS = ["Protocol", "Patients", "Results"];
 
-export default function StepIndicator({ active }: { active: number }) {
+export default function StepIndicator({
+  active,
+  steps = DEFAULT_STEPS,
+}: {
+  active: number;
+  steps?: string[];
+}) {
   return (
     <ol className="flex items-center gap-4">
-      {STEPS.map((label, i) => {
+      {steps.map((label, i) => {
         const state = i < active ? "done" : i === active ? "active" : "todo";
         return (
           <li key={label} className="flex items-center gap-2">
@@ -25,7 +31,7 @@ export default function StepIndicator({ active }: { active: number }) {
             >
               {label}
             </span>
-            {i < STEPS.length - 1 && <span className="mx-2 h-px w-8 bg-slate-200" />}
+            {i < steps.length - 1 && <span className="mx-2 h-px w-8 bg-slate-200" />}
           </li>
         );
       })}

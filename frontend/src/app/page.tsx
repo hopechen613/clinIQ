@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { matchPatients, parseCriteria } from "@/lib/api";
 import type { MatchPatientsResponse, ParseCriteriaResponse, PatientRecord } from "@/lib/types";
 import StepIndicator from "@/components/StepIndicator";
@@ -70,7 +71,12 @@ export default function Home() {
             </h1>
             <p className="text-xs text-slate-500">AI-assisted clinical trial patient matching</p>
           </div>
-          <StepIndicator active={step} />
+          <div className="flex items-center gap-4">
+            <StepIndicator active={step} />
+            <Link href="/patient" className="text-xs font-medium text-slate-400 hover:text-teal-600">
+              Patient view →
+            </Link>
+          </div>
         </div>
       </header>
 

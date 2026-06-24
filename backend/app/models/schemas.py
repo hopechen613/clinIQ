@@ -55,3 +55,64 @@ class PatientMatchResult(BaseModel):
 class MatchPatientsResponse(BaseModel):
     trial_id: Optional[str] = None
     results: List[PatientMatchResult]
+
+
+# --- Patient-facing trial search (mirrors trialgpt.app) ---
+
+
+class ExtractProfileRequest(BaseModel):
+    patient_text: str = Field(
+        ..., min_length=10, description="Patient's free-text description of their condition/situation"
+    )
+
+
+class PatientProfile(BaseModel):
+    condition_query: str = Field(..., description="Concise condition/disease phrase for trial search, e.g. 'non-small cell lung cancer'")
+    location: Optional[str] = Field(None, description="City/state/country the patient can travel to, if mentioned")
+    age: Optional[int] = None
+    sex: Optional[Literal["male", "female", "unspecified"]] = None
+    summary: str = Field(..., description="Normalized clinical summary of the patient for eligibility matching")
+
+
+class FindTrialsRequest(BaseModel):
+    profile: PatientProfile
+    max_results: int = Field(8, ge=1, le=20)
+
+
+class TrialCandidate(BaseModel):
+    nct_id: str
+    title: str
+    status: str
+    phase: Optional[str] = None
+    conditions: List[str] = []
+    brief_summary: str
+    eligibility_criteria: str
+    sex: Optional[str] = None
+    minimum_age: Optional[str] = None
+    maximum_age: Optional[str] = None
+    locations: List[str] = []
+    url: str
+
+
+class TrialKeyPoint(BaseModel):
+    type: Literal["supporting", "conflicting", "missing_info"]
+    text: str
+
+
+class TrialMatchResult(BaseModel):
+    nct_id: str
+    title: str
+    status: str
+    phase: Optional[str] = None
+    locations: List[str] = []
+    url: str
+    eligibility: Literal["likely_eligible", "possibly_eligible", "likely_ineligible", "insufficient_info"]
+    score: float = Field(..., ge=0, le=100)
+    explanation: str
+    key_points: List[TrialKeyPoint]
+
+
+class FindTrialsResponse(BaseModel):
+    profile: PatientProfile
+    candidates_found: int
+    results: List[TrialMatchResult]

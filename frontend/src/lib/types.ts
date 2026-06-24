@@ -50,3 +50,43 @@ export interface MatchPatientsResponse {
   trial_id?: string | null;
   results: PatientMatchResult[];
 }
+
+// --- Patient-facing trial search (mirrors trialgpt.app) ---
+
+export type TrialEligibility =
+  | "likely_eligible"
+  | "possibly_eligible"
+  | "likely_ineligible"
+  | "insufficient_info";
+
+export interface PatientProfile {
+  condition_query: string;
+  location?: string | null;
+  age?: number | null;
+  sex?: "male" | "female" | "unspecified" | null;
+  summary: string;
+}
+
+export interface TrialKeyPoint {
+  type: "supporting" | "conflicting" | "missing_info";
+  text: string;
+}
+
+export interface TrialMatchResult {
+  nct_id: string;
+  title: string;
+  status: string;
+  phase?: string | null;
+  locations: string[];
+  url: string;
+  eligibility: TrialEligibility;
+  score: number;
+  explanation: string;
+  key_points: TrialKeyPoint[];
+}
+
+export interface FindTrialsResponse {
+  profile: PatientProfile;
+  candidates_found: number;
+  results: TrialMatchResult[];
+}

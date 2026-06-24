@@ -1,6 +1,8 @@
 import type {
+  FindTrialsResponse,
   MatchPatientsResponse,
   ParseCriteriaResponse,
+  PatientProfile,
   PatientRecord,
 } from "./types";
 
@@ -30,5 +32,18 @@ export function matchPatients(criteria: ParseCriteriaResponse, patients: Patient
   return postJSON<MatchPatientsResponse>("/api/match-patients", {
     criteria,
     patients,
+  });
+}
+
+export function extractPatientProfile(patientText: string) {
+  return postJSON<PatientProfile>("/api/patient/extract-profile", {
+    patient_text: patientText,
+  });
+}
+
+export function findTrials(profile: PatientProfile, maxResults = 8) {
+  return postJSON<FindTrialsResponse>("/api/patient/find-trials", {
+    profile,
+    max_results: maxResults,
   });
 }
