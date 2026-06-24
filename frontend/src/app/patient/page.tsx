@@ -2,47 +2,29 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { extractPatientProfile, findTrials } from "@/lib/api";
-import type { FindTrialsResponse, PatientProfile } from "@/lib/types";
+import { findTrials } from "@/lib/api";
+import { DEFAULT_TRIAL_SEARCH_FILTERS, type FindTrialsResponse, type TrialSearchFilters } from "@/lib/types";
 import StepIndicator from "@/components/StepIndicator";
-import DescribeStep from "@/components/patient/DescribeStep";
-import ProfileReviewStep from "@/components/patient/ProfileReviewStep";
+import SearchFiltersStep from "@/components/patient/SearchFiltersStep";
 import TrialResultsStep from "@/components/patient/TrialResultsStep";
 
-const STEPS = ["Describe", "Review", "Trials"];
+const STEPS = ["Search", "Trials"];
 
 export default function PatientPage() {
   const [step, setStep] = useState(0);
-
-  const [patientText, setPatientText] = useState("");
-  const [profile, setProfile] = useState<PatientProfile | null>(null);
+  const [filters, setFilters] = useState<TrialSearchFilters>(DEFAULT_TRIAL_SEARCH_FILTERS);
   const [results, setResults] = useState<FindTrialsResponse | null>(null);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function handleExtractProfile() {
+  async function handleSearch() {
     setLoading(true);
     setError(null);
     try {
-      const extracted = await extractPatientProfile(patientText);
-      setProfile(extracted);
-      setStep(1);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to read your description");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function handleFindTrials() {
-    if (!profile) return;
-    setLoading(true);
-    setError(null);
-    try {
-      const found = await findTrials(profile);
+      const found = await findTrials(filters);
       setResults(found);
-      setStep(2);
+      setStep(1);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to search for trials");
     } finally {
@@ -52,8 +34,7 @@ export default function PatientPage() {
 
   function startOver() {
     setStep(0);
-    setPatientText("");
-    setProfile(null);
+    setFilters(DEFAULT_TRIAL_SEARCH_FILTERS);
     setResults(null);
     setError(null);
   }
@@ -81,26 +62,16 @@ export default function PatientPage() {
       <main className="mx-auto max-w-4xl px-6 py-10">
         <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
           {step === 0 && (
-            <DescribeStep
-              patientText={patientText}
-              onPatientTextChange={setPatientText}
-              onSubmit={handleExtractProfile}
+            <SearchFiltersStep
+              filters={filters}
+              onFiltersChange={setFilters}
+              onSubmit={handleSearch}
               loading={loading}
               error={error}
             />
           )}
-          {step === 1 && profile && (
-            <ProfileReviewStep
-              profile={profile}
-              onProfileChange={setProfile}
-              onBack={() => setStep(0)}
-              onSubmit={handleFindTrials}
-              loading={loading}
-              error={error}
-            />
-          )}
-          {step === 2 && results && (
-            <TrialResultsStep data={results} onBack={() => setStep(1)} onStartOver={startOver} />
+          {step === 1 && results && (
+            <TrialResultsStep data={results} onBack={() => setStep(0)} onStartOver={startOver} />
           )}
         </div>
       </main>

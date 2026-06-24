@@ -2,8 +2,8 @@ import type {
   FindTrialsResponse,
   MatchPatientsResponse,
   ParseCriteriaResponse,
-  PatientProfile,
   PatientRecord,
+  TrialSearchFilters,
 } from "./types";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -35,15 +35,9 @@ export function matchPatients(criteria: ParseCriteriaResponse, patients: Patient
   });
 }
 
-export function extractPatientProfile(patientText: string) {
-  return postJSON<PatientProfile>("/api/patient/extract-profile", {
-    patient_text: patientText,
-  });
-}
-
-export function findTrials(profile: PatientProfile, maxResults = 8) {
+export function findTrials(filters: TrialSearchFilters, maxResults = 8) {
   return postJSON<FindTrialsResponse>("/api/patient/find-trials", {
-    profile,
+    filters,
     max_results: maxResults,
   });
 }

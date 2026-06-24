@@ -57,25 +57,59 @@ class MatchPatientsResponse(BaseModel):
     results: List[PatientMatchResult]
 
 
-# --- Patient-facing trial search (mirrors trialgpt.app) ---
+# --- Patient-facing trial search: ClinicalTrials.gov-style structured search ---
 
 
-class ExtractProfileRequest(BaseModel):
-    patient_text: str = Field(
-        ..., min_length=10, description="Patient's free-text description of their condition/situation"
+class TrialSearchFilters(BaseModel):
+    # Basic search
+    condition: Optional[str] = Field(None, description="Condition/disease, e.g. 'non-small cell lung cancer'")
+    other_terms: Optional[str] = None
+    intervention: Optional[str] = None
+    location: Optional[str] = Field(None, description="Address, city, state, zip code, or country")
+    title: Optional[str] = Field(None, description="Title and/or title acronym")
+    additional_details: Optional[str] = Field(
+        None, description="Optional free-text clinical detail to enrich AI explanations (not used for filtering)"
     )
 
+    # Study status
+    study_status: Literal["all", "recruiting_not_yet"] = "recruiting_not_yet"
 
-class PatientProfile(BaseModel):
-    condition_query: str = Field(..., description="Concise condition/disease phrase for trial search, e.g. 'non-small cell lung cancer'")
-    location: Optional[str] = Field(None, description="City/state/country the patient can travel to, if mentioned")
-    age: Optional[int] = None
-    sex: Optional[Literal["male", "female", "unspecified"]] = None
-    summary: str = Field(..., description="Normalized clinical summary of the patient for eligibility matching")
+    # Eligibility
+    sex: Literal["all", "female", "male"] = "all"
+    age_groups: List[Literal["child", "adult", "older_adult"]] = []
+    age_min: Optional[int] = Field(None, ge=0, le=130)
+    age_max: Optional[int] = Field(None, ge=0, le=130)
+    accepts_healthy_volunteers: bool = False
+
+    # Study design
+    phases: List[Literal["early_phase1", "phase1", "phase2", "phase3", "phase4", "na"]] = []
+    study_types: List[Literal["interventional", "observational", "patient_registries", "expanded_access"]] = []
+    expanded_access_types: List[Literal["individual", "intermediate", "treatment"]] = []
+
+    # Results & documents
+    has_results: Optional[Literal["with", "without"]] = None
+    study_documents: List[Literal["protocols", "saps", "icfs"]] = []
+
+    # Funder
+    funder_types: List[Literal["nih", "fed", "industry", "all_others"]] = []
+
+    # Date ranges (mm/dd/yyyy, either side optional)
+    study_start_from: Optional[str] = None
+    study_start_to: Optional[str] = None
+    primary_completion_from: Optional[str] = None
+    primary_completion_to: Optional[str] = None
+    first_posted_from: Optional[str] = None
+    first_posted_to: Optional[str] = None
+    results_first_posted_from: Optional[str] = None
+    results_first_posted_to: Optional[str] = None
+    last_update_posted_from: Optional[str] = None
+    last_update_posted_to: Optional[str] = None
+    study_completion_from: Optional[str] = None
+    study_completion_to: Optional[str] = None
 
 
 class FindTrialsRequest(BaseModel):
-    profile: PatientProfile
+    filters: TrialSearchFilters
     max_results: int = Field(8, ge=1, le=20)
 
 
@@ -113,6 +147,6 @@ class TrialMatchResult(BaseModel):
 
 
 class FindTrialsResponse(BaseModel):
-    profile: PatientProfile
+    filters: TrialSearchFilters
     candidates_found: int
     results: List[TrialMatchResult]

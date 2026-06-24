@@ -51,7 +51,7 @@ export interface MatchPatientsResponse {
   results: PatientMatchResult[];
 }
 
-// --- Patient-facing trial search (mirrors trialgpt.app) ---
+// --- Patient-facing trial search: ClinicalTrials.gov-style structured search ---
 
 export type TrialEligibility =
   | "likely_eligible"
@@ -59,13 +59,63 @@ export type TrialEligibility =
   | "likely_ineligible"
   | "insufficient_info";
 
-export interface PatientProfile {
-  condition_query: string;
+export type AgeGroup = "child" | "adult" | "older_adult";
+export type Phase = "early_phase1" | "phase1" | "phase2" | "phase3" | "phase4" | "na";
+export type StudyType = "interventional" | "observational" | "patient_registries" | "expanded_access";
+export type ExpandedAccessType = "individual" | "intermediate" | "treatment";
+export type StudyDocument = "protocols" | "saps" | "icfs";
+export type FunderType = "nih" | "fed" | "industry" | "all_others";
+
+export interface TrialSearchFilters {
+  condition?: string | null;
+  other_terms?: string | null;
+  intervention?: string | null;
   location?: string | null;
-  age?: number | null;
-  sex?: "male" | "female" | "unspecified" | null;
-  summary: string;
+  title?: string | null;
+  additional_details?: string | null;
+
+  study_status: "all" | "recruiting_not_yet";
+
+  sex: "all" | "female" | "male";
+  age_groups: AgeGroup[];
+  age_min?: number | null;
+  age_max?: number | null;
+  accepts_healthy_volunteers: boolean;
+
+  phases: Phase[];
+  study_types: StudyType[];
+  expanded_access_types: ExpandedAccessType[];
+
+  has_results?: "with" | "without" | null;
+  study_documents: StudyDocument[];
+
+  funder_types: FunderType[];
+
+  study_start_from?: string | null;
+  study_start_to?: string | null;
+  primary_completion_from?: string | null;
+  primary_completion_to?: string | null;
+  first_posted_from?: string | null;
+  first_posted_to?: string | null;
+  results_first_posted_from?: string | null;
+  results_first_posted_to?: string | null;
+  last_update_posted_from?: string | null;
+  last_update_posted_to?: string | null;
+  study_completion_from?: string | null;
+  study_completion_to?: string | null;
 }
+
+export const DEFAULT_TRIAL_SEARCH_FILTERS: TrialSearchFilters = {
+  study_status: "recruiting_not_yet",
+  sex: "all",
+  age_groups: [],
+  accepts_healthy_volunteers: false,
+  phases: [],
+  study_types: [],
+  expanded_access_types: [],
+  study_documents: [],
+  funder_types: [],
+};
 
 export interface TrialKeyPoint {
   type: "supporting" | "conflicting" | "missing_info";
@@ -86,7 +136,7 @@ export interface TrialMatchResult {
 }
 
 export interface FindTrialsResponse {
-  profile: PatientProfile;
+  filters: TrialSearchFilters;
   candidates_found: number;
   results: TrialMatchResult[];
 }

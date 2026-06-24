@@ -45,10 +45,11 @@ export default function TrialResultsStep({
       <div>
         <h2 className="text-lg font-semibold text-slate-900">Matching trials</h2>
         <p className="mt-1 text-sm text-slate-500">
-          Searched {data.candidates_found} recruiting trial
-          {data.candidates_found === 1 ? "" : "s"} on ClinicalTrials.gov for &ldquo;
-          {data.profile.condition_query}&rdquo;{data.profile.location ? ` near ${data.profile.location}` : ""}
-          , ranked by how well you might fit.
+          Found {data.candidates_found} matching trial{data.candidates_found === 1 ? "" : "s"} on
+          ClinicalTrials.gov
+          {data.filters.condition ? ` for "${data.filters.condition}"` : ""}
+          {data.filters.location ? ` near ${data.filters.location}` : ""}, ranked by how well you
+          might fit.
         </p>
       </div>
 
