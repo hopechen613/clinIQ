@@ -80,10 +80,14 @@ function TextField({
   placeholder?: string;
   helper?: string;
 }) {
+  const id = `field-${label.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
   return (
     <div>
-      <label className="mb-1 block text-sm font-medium text-slate-700">{label}</label>
+      <label htmlFor={id} className="mb-1 block text-sm font-medium text-slate-700">
+        {label}
+      </label>
       <input
+        id={id}
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
@@ -95,9 +99,18 @@ function TextField({
   );
 }
 
-function DateField({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+function DateField({
+  id,
+  value,
+  onChange,
+}: {
+  id: string;
+  value: string;
+  onChange: (v: string) => void;
+}) {
   return (
     <input
+      id={id}
       type="text"
       value={value}
       onChange={(e) => onChange(e.target.value)}
@@ -120,17 +133,22 @@ function DateRangeRow({
   onFromChange: (v: string) => void;
   onToChange: (v: string) => void;
 }) {
+  const slug = label.toLowerCase().replace(/[^a-z0-9]+/g, "-");
   return (
     <div>
       <p className="mb-1 text-sm font-medium text-slate-700">{label}</p>
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="mb-0.5 block text-xs text-slate-500">From</label>
-          <DateField value={from} onChange={onFromChange} />
+          <label htmlFor={`${slug}-from`} className="mb-0.5 block text-xs text-slate-500">
+            From
+          </label>
+          <DateField id={`${slug}-from`} value={from} onChange={onFromChange} />
         </div>
         <div>
-          <label className="mb-0.5 block text-xs text-slate-500">To</label>
-          <DateField value={to} onChange={onToChange} />
+          <label htmlFor={`${slug}-to`} className="mb-0.5 block text-xs text-slate-500">
+            To
+          </label>
+          <DateField id={`${slug}-to`} value={to} onChange={onToChange} />
         </div>
       </div>
     </div>
@@ -232,10 +250,11 @@ export default function SearchFiltersStep({
       </div>
 
       <div>
-        <label className="mb-1 block text-sm font-medium text-slate-700">
+        <label htmlFor="additional-details" className="mb-1 block text-sm font-medium text-slate-700">
           Additional clinical details <span className="text-slate-400">(optional)</span>
         </label>
         <textarea
+          id="additional-details"
           value={filters.additional_details || ""}
           onChange={(e) => set("additional_details", e.target.value)}
           rows={3}
@@ -263,7 +282,7 @@ export default function SearchFiltersStep({
       <button
         type="button"
         onClick={() => setShowMoreFilters((v) => !v)}
-        className="text-sm font-semibold text-teal-600 hover:underline"
+        className="block text-sm font-semibold text-teal-600 hover:underline"
       >
         {showMoreFilters ? "− Fewer filters" : "+ More filters"}
       </button>
@@ -320,8 +339,11 @@ export default function SearchFiltersStep({
               ) : (
                 <div className="grid grid-cols-2 gap-3 pl-1">
                   <div>
-                    <label className="mb-0.5 block text-xs text-slate-500">From (years old)</label>
+                    <label htmlFor="age-min" className="mb-0.5 block text-xs text-slate-500">
+                      From (years old)
+                    </label>
                     <input
+                      id="age-min"
                       type="number"
                       min={0}
                       max={130}
@@ -331,8 +353,11 @@ export default function SearchFiltersStep({
                     />
                   </div>
                   <div>
-                    <label className="mb-0.5 block text-xs text-slate-500">To (years old)</label>
+                    <label htmlFor="age-max" className="mb-0.5 block text-xs text-slate-500">
+                      To (years old)
+                    </label>
                     <input
+                      id="age-max"
                       type="number"
                       min={0}
                       max={130}
@@ -503,7 +528,7 @@ export default function SearchFiltersStep({
       <button
         type="button"
         onClick={() => setShowMoreWaysToSearch((v) => !v)}
-        className="text-sm font-semibold text-teal-600 hover:underline"
+        className="block text-sm font-semibold text-teal-600 hover:underline"
       >
         {showMoreWaysToSearch ? "− Fewer ways to search" : "+ More ways to search"}
       </button>
